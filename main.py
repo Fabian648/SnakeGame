@@ -12,8 +12,8 @@ red = (200, 0, 0)
 green = (0, 200, 0)
 
 # Fenstergröße
-width = 600
-height = 400
+width = 800
+height = 600
 
 # Fenster
 win = pygame.display.set_mode((width, height))
@@ -21,7 +21,8 @@ pygame.display.set_caption('Snake Game by Fabian648')
 
 # Snake-Parameter
 snake_block = 10
-snake_speed = 15
+snake_speed = 13
+head_pos = 1 # 1 - oben, 2 - rechts, 3 - unten, 4 - links
 clock = pygame.time.Clock()
 font = pygame.font.SysFont(None, 35)
 
@@ -31,7 +32,7 @@ def draw_snake(snake_block, snake_list):
 
 def message(msg, color):
     text = font.render(msg, True, color)
-    win.blit(text, [width // 20, height // 3])
+    win.blit(text, [width // 9, height // 3])
 
 def game_loop():
     game_over = False
@@ -44,6 +45,10 @@ def game_loop():
 
     snake = []
     length = 1
+    head_pos = 1
+
+    score = 0
+    score_increment = 10
 
     food_x = round(random.randrange(0, width - snake_block) / 10.0) * 10.0
     food_y = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
@@ -70,18 +75,22 @@ def game_loop():
             if event.type == pygame.QUIT:
                 game_over = True
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
+                if head_pos != 2 and event.key == pygame.K_LEFT:
                     x_change = -snake_block
                     y_change = 0
-                elif event.key == pygame.K_RIGHT:
+                    head_pos = 4
+                elif head_pos != 4 and event.key == pygame.K_RIGHT:
                     x_change = snake_block
                     y_change = 0
-                elif event.key == pygame.K_UP:
+                    head_pos = 2
+                elif head_pos != 3 and event.key == pygame.K_UP:
                     y_change = -snake_block
                     x_change = 0
-                elif event.key == pygame.K_DOWN:
+                    head_pos = 1
+                elif head_pos != 1 and event.key == pygame.K_DOWN:
                     y_change = snake_block
                     x_change = 0
+                    head_pos = 3
 
         x += x_change
         y += y_change
@@ -93,6 +102,9 @@ def game_loop():
         pygame.draw.rect(win, red, [food_x, food_y, snake_block, snake_block])
         snake_head = [x, y]
         snake.append(snake_head)
+
+        score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+        win.blit(score_text, (10, 10))
 
         if len(snake) > length:
             del snake[0]
@@ -108,6 +120,7 @@ def game_loop():
             food_x = round(random.randrange(0, width - snake_block) / 10.0) * 10.0
             food_y = round(random.randrange(0, height - snake_block) / 10.0) * 10.0
             length += 1
+            score += score_increment
 
         clock.tick(snake_speed)
 
